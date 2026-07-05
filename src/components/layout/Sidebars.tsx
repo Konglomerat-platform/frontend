@@ -1,6 +1,6 @@
 import { BarChart3, FileText, FlaskConical, Grid3X3, Home, MessageCircle, Newspaper, Package, SlidersHorizontal, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router";
+import { Link } from "react-router";
 
 type SidebarProps = {
   active: string;
@@ -21,12 +21,12 @@ export function AdminSidebar({ active, onNavigate }: SidebarProps) {
     <>
       <div className="side-label">{t("directorPanel")}</div>
       {adminLinks.map((item) => (
-        <NavLink key={item.key} className={`side-link ${active === item.key ? "active" : ""}`} to={item.href} onClick={onNavigate}>
+        <Link key={item.key} className={`side-link ${active === item.key ? "active" : ""}`} to={item.href} onClick={onNavigate}>
           <span className="ic">
             <item.Icon />
           </span>
           <span>{t(item.labelKey)}</span>
-        </NavLink>
+        </Link>
       ))}
     </>
   );
@@ -39,12 +39,12 @@ export function CompanySidebar({ active, onNavigate }: SidebarProps) {
     <>
       <div className="side-label">{t("company")}</div>
       {companyLinks.map((item) => (
-        <NavLink key={item.key} className={`side-link ${active === item.key ? "active" : ""}`} to={item.href} onClick={onNavigate}>
+        <Link key={item.key} className={`side-link ${active === item.key ? "active" : ""}`} to={item.href} onClick={onNavigate}>
           <span className="ic">
             <item.Icon />
           </span>
           <span>{t(item.labelKey)}</span>
-        </NavLink>
+        </Link>
       ))}
     </>
   );
