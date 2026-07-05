@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { SiteHeader } from "../components/layout/SiteHeader";
 import { AdminSidebar, CompanySidebar } from "../components/layout/Sidebars";
@@ -12,6 +13,7 @@ type WorkspaceLayoutProps = {
 };
 
 export function WorkspaceLayout({ role, active, children, chatPage = false }: WorkspaceLayoutProps) {
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useBodyClass("tg-page", chatPage);
@@ -19,7 +21,7 @@ export function WorkspaceLayout({ role, active, children, chatPage = false }: Wo
   return (
     <>
       <SiteHeader nav={[]} navOpen={sidebarOpen} onMenuClick={() => setSidebarOpen((value) => !value)} />
-      {sidebarOpen ? <button className="mobile-backdrop show" aria-label="Close menu" onClick={() => setSidebarOpen(false)} /> : null}
+      {sidebarOpen ? <button className="mobile-backdrop show" aria-label={t("closeMenu")} onClick={() => setSidebarOpen(false)} /> : null}
       <div className="app-shell">
         <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
           {role === "admin" ? (

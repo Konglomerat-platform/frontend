@@ -14,7 +14,7 @@ export function ProductCard({ product, lang }: { product: Product; lang?: string
     <Link className="card product-card" to={`/products/${product.id}`}>
       <div className="product-thumb">
         {image ? <img className="prod-img" src={image} alt="" /> : product.ico || product.icon ? <span className="prod-emoji">{product.ico || product.icon}</span> : <Package />}
-        <button type="button" className="fav-btn" aria-label="Favorite" onClick={(event) => event.preventDefault()}>
+        <button type="button" className="fav-btn" aria-label={t("favorite")} onClick={(event) => event.preventDefault()}>
           <Heart />
         </button>
       </div>

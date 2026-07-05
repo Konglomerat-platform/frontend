@@ -1,13 +1,15 @@
 import { FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useAuth } from "../../auth/AuthContext";
 import { ProductCard } from "../../components/cards/ProductCard";
 import { PageTitle } from "../../components/ui/PageTitle";
 import { WorkspaceLayout } from "../../layouts/WorkspaceLayout";
-import { useAuth } from "../../auth/AuthContext";
 import { createProduct, listProducts } from "../../services/catalogService";
 
 export function CompanyContentPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const qc = useQueryClient();
   const { data: products = [] } = useQuery({ queryKey: ["my-products", user?.name], queryFn: () => listProducts(user?.name), enabled: !!user });
@@ -22,12 +24,12 @@ export function CompanyContentPage() {
 
   return (
     <WorkspaceLayout role="company" active="content">
-      <PageTitle title="Контент управление" />
+      <PageTitle title={t("contentManagement")} />
       <form className="panel panel-body" onSubmit={submit}>
-        <div className="form-group"><label>Название товара</label><input className="form-control" name="name" required /></div>
-        <div className="form-group"><label>Цена</label><input className="form-control" name="price" required /></div>
-        <div className="form-group"><label>Описание</label><textarea className="form-control" name="desc" rows={3} /></div>
-        <button className="btn btn-primary">Добавить товар</button>
+        <div className="form-group"><label>{t("productName")}</label><input className="form-control" name="name" required /></div>
+        <div className="form-group"><label>{t("price")}</label><input className="form-control" name="price" required /></div>
+        <div className="form-group"><label>{t("description")}</label><textarea className="form-control" name="desc" rows={3} /></div>
+        <button className="btn btn-primary">{t("addProduct")}</button>
       </form>
       <div className="grid cols-4 market-grid mt-3">{products.map((product) => <ProductCard key={product.id} product={product} />)}</div>
     </WorkspaceLayout>
