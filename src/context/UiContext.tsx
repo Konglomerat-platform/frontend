@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 type Toast = { id: number; title: string; message?: string; type?: "success" | "error" | "info" };
 type ConfirmState = { title: string; danger?: boolean; resolve: (value: boolean) => void };
@@ -67,6 +68,7 @@ function ToastHost({ toasts, onClose }: { toasts: Toast[]; onClose: (id: number)
 }
 
 function ConfirmDialog({ state, onClose }: { state: ConfirmState | null; onClose: () => void }) {
+  const { t } = useTranslation();
   if (!state) return null;
   return (
     <div className="modal-overlay open">
@@ -89,7 +91,7 @@ function ConfirmDialog({ state, onClose }: { state: ConfirmState | null; onClose
               onClose();
             }}
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </div>
@@ -98,6 +100,7 @@ function ConfirmDialog({ state, onClose }: { state: ConfirmState | null; onClose
 }
 
 function PromptDialog({ state, onClose }: { state: PromptState | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const [value, setValue] = useState("");
 
   useEffect(() => {
@@ -133,7 +136,7 @@ function PromptDialog({ state, onClose }: { state: PromptState | null; onClose: 
               onClose();
             }}
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </form>
