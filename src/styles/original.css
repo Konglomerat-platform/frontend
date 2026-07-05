@@ -875,6 +875,26 @@ select.form-control { cursor: pointer; }
   border-radius: 10px; padding: 12px 14px; color: var(--text-dim); margin-top: 16px; }
 .auth-hint code { color: var(--gold); font-weight: 700; }
 
+/* ---------- Complaint page ---------- */
+.complaint-page {
+  min-height: calc(100vh - 74px);
+  display: grid;
+  place-items: center;
+  padding-top: 56px;
+  padding-bottom: 72px;
+}
+.complaint-card {
+  width: min(560px, 100%);
+  padding: 30px 32px 32px;
+}
+.complaint-card h1 {
+  margin-bottom: 18px;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+}
+.complaint-card textarea.form-control {
+  min-height: 150px;
+}
+
 /* ---------- Toast / alert ---------- */
 .toast-wrap { position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
   z-index: 999; display: flex; flex-direction: column; gap: 10px; width: min(420px, 92vw); }

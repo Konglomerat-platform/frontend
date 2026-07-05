@@ -20,8 +20,8 @@ export function ComplaintPage() {
   return (
     <>
       <SiteHeader />
-      <main className="section container">
-        <section className="card auth-card">
+      <main className="complaint-page container">
+        <section className="card complaint-card">
           <h1>{t("sendComplaint")}</h1>
           {sent ? (
             <div className="success"><Check /> {t("complaintSent")}</div>

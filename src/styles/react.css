@@ -420,6 +420,21 @@ button {
     padding-top: 24px;
   }
 
+  .complaint-page {
+    width: min(1200px, 92%);
+    min-height: calc(100vh - 74px);
+    padding-top: 34px;
+    padding-bottom: 44px;
+  }
+
+  .complaint-card {
+    padding: 22px 20px 24px;
+  }
+
+  .complaint-card textarea.form-control {
+    min-height: 132px;
+  }
+
   .site-footer {
     padding: 34px 0;
   }
