@@ -82,7 +82,7 @@ jobs:
 
           $SSH "$SERVER_USER@$SERVER_HOST" "cd '$APP_DIR' && if [ -f docker-compose.yml ]; then docker compose up -d nginx && docker compose ps nginx; fi"
           for attempt in $(seq 1 30); do
-            if curl -fsS "http://$SERVER_HOST/" >/dev/null; then
+            if $SSH "$SERVER_USER@$SERVER_HOST" "cd '$APP_DIR' && docker compose exec -T nginx wget -q -T 5 -O /dev/null http://127.0.0.1/"; then
               exit 0
             fi
             sleep 2

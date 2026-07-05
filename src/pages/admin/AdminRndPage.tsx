@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { PageTitle } from "../../components/ui/PageTitle";
 import { Panel } from "../../components/ui/Panel";
@@ -7,8 +8,10 @@ import { listRndSubmissions, updateRndSubmission } from "../../services/innovati
 import { localize } from "../../lib/format";
 
 export function AdminRndPage() {
+  const { i18n } = useTranslation();
   const qc = useQueryClient();
   const { data: rnd = [] } = useQuery({ queryKey: ["rnd-admin"], queryFn: listRndSubmissions });
+  const activeLang = i18n.resolvedLanguage || i18n.language;
   function decide(id: string, status: string) {
     updateRndSubmission(id, { status }).then(() => qc.invalidateQueries({ queryKey: ["rnd-admin"] }));
   }
@@ -18,9 +21,9 @@ export function AdminRndPage() {
       <Panel title="Очередь" count={rnd.length}>
         {rnd.map((item) => (
           <div className={`card rnd-card ${item.status}`} key={item.id}>
-            <h3>{localize(item.name)}</h3>
+            <h3>{localize(item.name, activeLang)}</h3>
             <div className="rnd-meta"><span>{item.company}</span><span>{item.cat}</span><span>{item.status}</span></div>
-            <p className="muted">{localize(item.desc)}</p>
+            <p className="muted">{localize(item.desc, activeLang)}</p>
             <div className="row">
               <button className="btn btn-primary btn-sm" onClick={() => decide(item.id, "approved")}>Одобрить</button>
               <button className="btn btn-danger btn-sm" onClick={() => decide(item.id, "rejected")}>Отклонить</button>

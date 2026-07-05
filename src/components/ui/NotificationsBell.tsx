@@ -1,5 +1,6 @@
 import { Bell, ChevronLeft } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 
@@ -7,9 +8,11 @@ import { localize } from "../../lib/format";
 import { listNotifications, markNotificationsRead } from "../../services/notificationService";
 
 export function NotificationsBell() {
+  const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const { data, refetch } = useQuery({ queryKey: ["notifications"], queryFn: listNotifications });
   const unread = data?.unread || 0;
+  const activeLang = i18n.resolvedLanguage || i18n.language;
 
   async function markRead() {
     await markNotificationsRead();
@@ -35,7 +38,7 @@ export function NotificationsBell() {
                     <Bell />
                   </div>
                   <div className="grow">
-                    <b>{localize(item.title)}</b>
+                    <b>{localize(item.title, activeLang)}</b>
                     <small>{item.text}</small>
                     <time>{item.at.slice(0, 16).replace("T", " ")}</time>
                   </div>

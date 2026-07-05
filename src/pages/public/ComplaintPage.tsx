@@ -1,11 +1,13 @@
 import { Check } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 
 import { SiteHeader } from "../../components/layout/SiteHeader";
 import { createComplaint } from "../../services/supportService";
 
 export function ComplaintPage() {
+  const { t } = useTranslation();
   const [sent, setSent] = useState(false);
   const mutation = useMutation({ mutationFn: createComplaint, onSuccess: () => setSent(true) });
 
@@ -20,15 +22,15 @@ export function ComplaintPage() {
       <SiteHeader />
       <main className="section container">
         <section className="card auth-card">
-          <h1>Отправить жалобу</h1>
+          <h1>{t("sendComplaint")}</h1>
           {sent ? (
-            <div className="success"><Check /> Жалоба отправлена!</div>
+            <div className="success"><Check /> {t("complaintSent")}</div>
           ) : (
             <form onSubmit={submit}>
-              <div className="form-group"><label>Имя или компания</label><input className="form-control" name="name" required /></div>
-              <div className="form-group"><label>Email или телефон</label><input className="form-control" name="contact" required /></div>
-              <div className="form-group"><label>Текст жалобы</label><textarea className="form-control" name="text" rows={5} required /></div>
-              <button className="btn btn-primary btn-block">Отправить</button>
+              <div className="form-group"><label>{t("nameOrCompany")}</label><input className="form-control" name="name" required /></div>
+              <div className="form-group"><label>{t("emailOrPhone")}</label><input className="form-control" name="contact" required /></div>
+              <div className="form-group"><label>{t("complaintText")}</label><textarea className="form-control" name="text" rows={5} required /></div>
+              <button className="btn btn-primary btn-block">{t("send")}</button>
             </form>
           )}
         </section>

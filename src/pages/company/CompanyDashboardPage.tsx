@@ -1,5 +1,6 @@
 import { FileText, FlaskConical, MessageCircle, Package, Video } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 
@@ -11,8 +12,10 @@ import { listConferences } from "../../services/operationsService";
 import { localize } from "../../lib/format";
 
 export function CompanyDashboardPage() {
+  const { i18n } = useTranslation();
   const { data: orders = [] } = useQuery({ queryKey: ["orders"], queryFn: listOrders });
   const { data: conferences = [] } = useQuery({ queryKey: ["conferences"], queryFn: listConferences });
+  const activeLang = i18n.resolvedLanguage || i18n.language;
 
   return (
     <WorkspaceLayout role="company" active="workspace">
@@ -33,8 +36,8 @@ export function CompanyDashboardPage() {
       <Panel title="Заявки покупателей" count={orders.length}>
         {orders.length ? orders.map((order) => (
           <div className="list-row" key={order.id}>
-            <div className="avatar">{localize(order.product.name)[0]}</div>
-            <div className="grow"><b>{order.customer.name}</b><small>{order.customer.contact} · {localize(order.product.name)} · x{order.qty}</small></div>
+            <div className="avatar">{localize(order.product.name, activeLang)[0]}</div>
+            <div className="grow"><b>{order.customer.name}</b><small>{order.customer.contact} · {localize(order.product.name, activeLang)} · x{order.qty}</small></div>
             <span className="tag">{order.status}</span>
           </div>
         )) : <p className="muted">Пока заказов нет.</p>}

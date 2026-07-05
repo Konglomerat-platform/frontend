@@ -345,9 +345,10 @@ button {
   height: 18px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
   .menu-toggle {
     display: inline-grid;
+    flex: 0 0 40px;
   }
 
   .site-header .brand small {

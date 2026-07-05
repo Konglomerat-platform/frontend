@@ -1,4 +1,6 @@
 import { Layers, LogOut, Menu, X } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../auth/AuthContext";
@@ -6,7 +8,7 @@ import { LanguageSwitch } from "../ui/LanguageSwitch";
 import { NotificationsBell } from "../ui/NotificationsBell";
 import { ThemeToggle } from "../ui/ThemeToggle";
 
-export type HeaderNavItem = { href: string; label: string };
+export type HeaderNavItem = { href: string; labelKey: string };
 
 type SiteHeaderProps = {
   nav?: HeaderNavItem[];
@@ -18,27 +20,47 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ nav = publicNav, navOpen = false, onMenuClick, onNavClose, showNotifications = true }: SiteHeaderProps) {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
+  const [localNavOpen, setLocalNavOpen] = useState(false);
+  const hasHeaderNav = nav.length > 0;
+  const menuOpen = onMenuClick ? navOpen : localNavOpen;
+  const canToggleMenu = Boolean(onMenuClick || hasHeaderNav);
+
+  function handleMenuClick() {
+    if (onMenuClick) {
+      onMenuClick();
+      return;
+    }
+    setLocalNavOpen((value) => !value);
+  }
+
+  function handleNavClose() {
+    setLocalNavOpen(false);
+    onNavClose?.();
+  }
 
   return (
     <div id="header">
       <header className="site-header">
         <div className="container header-inner">
-          <button className="icon-btn menu-toggle" type="button" aria-label="Menu" onClick={onMenuClick}>
-            {navOpen ? <X /> : <Menu />}
-          </button>
+          {canToggleMenu ? (
+            <button className="icon-btn menu-toggle" type="button" aria-label="Menu" aria-expanded={menuOpen} onClick={handleMenuClick}>
+              {menuOpen ? <X /> : <Menu />}
+            </button>
+          ) : null}
           <Link className="brand" to="/">
             <span className="logo-mark">
               <Layers />
             </span>
             <span>
-              <span className="logo-text">Konglomerat</span>
-              <small>National AI Business OS</small>
+              <span className="logo-text">{t("brand")}</span>
+              <small>{t("tagline")}</small>
             </span>
           </Link>
-          <nav className={`header-nav ${navOpen ? "open" : ""}`}>
+          <nav className={`header-nav ${hasHeaderNav && menuOpen ? "open" : ""}`}>
             {nav.map((item) => (
-              <NavLink key={item.href} to={item.href} onClick={onNavClose}>
-                {item.label}
+              <NavLink key={item.href} to={item.href} onClick={handleNavClose}>
+                {t(item.labelKey)}
               </NavLink>
             ))}
           </nav>
@@ -48,11 +70,11 @@ export function SiteHeader({ nav = publicNav, navOpen = false, onMenuClick, onNa
             {user && showNotifications ? <NotificationsBell /> : null}
             {user ? (
               <button className="btn btn-soft btn-sm" type="button" onClick={logout}>
-                <LogOut /> Выйти
+                <LogOut /> {t("logout")}
               </button>
             ) : (
               <Link className="btn btn-primary btn-sm" to="/login">
-                Войти
+                {t("login")}
               </Link>
             )}
           </div>
@@ -63,10 +85,10 @@ export function SiteHeader({ nav = publicNav, navOpen = false, onMenuClick, onNa
 }
 
 const publicNav: HeaderNavItem[] = [
-  { href: "/#about", label: "О нас" },
-  { href: "/#showrooms", label: "Шоурумы" },
-  { href: "/favorites", label: "Избранное" },
-  { href: "/#news", label: "Новости" },
-  { href: "/assistant", label: "AI-ассистент" },
-  { href: "/complaint", label: "Жалоба" },
+  { href: "/#about", labelKey: "about" },
+  { href: "/#showrooms", labelKey: "showrooms" },
+  { href: "/favorites", labelKey: "favorites" },
+  { href: "/#news", labelKey: "news" },
+  { href: "/assistant", labelKey: "assistant" },
+  { href: "/complaint", labelKey: "complaint" },
 ];

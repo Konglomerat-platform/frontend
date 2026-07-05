@@ -1,10 +1,14 @@
 import { Newspaper } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { localize } from "../../lib/format";
 import type { NewsArticle } from "../../types";
 
-export function NewsCard({ article, lang = "ru" }: { article: NewsArticle; lang?: string }) {
+export function NewsCard({ article, lang }: { article: NewsArticle; lang?: string }) {
+  const { i18n } = useTranslation();
+  const activeLang = lang || i18n.resolvedLanguage || i18n.language;
+
   return (
     <Link className="card news-item" to={`/news/${article.id}`}>
       <div className="news-ico">
@@ -12,8 +16,8 @@ export function NewsCard({ article, lang = "ru" }: { article: NewsArticle; lang?
       </div>
       <div>
         <time>{article.date}</time>
-        <h4>{localize(article.title, lang)}</h4>
-        <p className="muted">{localize(article.text, lang)}</p>
+        <h4>{localize(article.title, activeLang)}</h4>
+        <p className="muted">{localize(article.text, activeLang)}</p>
       </div>
     </Link>
   );

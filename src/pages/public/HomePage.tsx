@@ -1,20 +1,26 @@
 import { Bot, Building2, Check, ChevronRight, Mail, Newspaper, Phone, ShoppingBag } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 
-import { SiteHeader } from "../../components/layout/SiteHeader";
+import { useAuth } from "../../auth/AuthContext";
 import { ProductCard } from "../../components/cards/ProductCard";
 import { NewsCard } from "../../components/cards/NewsCard";
-import { getStats } from "../../services/operationsService";
+import { SiteHeader } from "../../components/layout/SiteHeader";
 import { listProducts } from "../../services/catalogService";
 import { listNews } from "../../services/contentService";
+import { getStats } from "../../services/operationsService";
 
 export function HomePage() {
   const location = useLocation();
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: getStats });
   const { data: products = [] } = useQuery({ queryKey: ["products"], queryFn: () => listProducts() });
   const { data: news = [] } = useQuery({ queryKey: ["news"], queryFn: listNews });
+  const platformHref = user?.role === "admin" ? "/admin" : user?.role === "company" ? "/company" : "/login";
+  const platformLabel = user ? t("goToCabinet") : t("heroPrimary");
 
   useEffect(() => {
     if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
@@ -26,53 +32,49 @@ export function HomePage() {
       <main>
         <section className="hero container">
           <div>
-            <span className="eyebrow">30 компаний · 1 платформа</span>
-            <h1>
-              Национальный <span className="grad">Konglomerat</span> под управлением <span className="hl-ai">AI</span>
-            </h1>
-            <p className="lead">
-              Единая экосистема для управления компаниями, шоурумами, R&D, конференциями, обращениями и аналитикой.
-            </p>
+            <span className="eyebrow">{t("heroEyebrow")}</span>
+            <h1>{t("heroTitle")}</h1>
+            <p className="lead">{t("heroLead")}</p>
             <div className="hero-actions">
-              <a className="btn btn-primary" href="/login">
-                Войти в платформу <ChevronRight />
+              <a className="btn btn-primary" href={platformHref}>
+                {platformLabel} <ChevronRight />
               </a>
               <a className="btn btn-ghost" href="#showrooms">
-                Смотреть шоурумы
+                {t("heroSecondary")}
               </a>
             </div>
             <div className="hero-stats">
               <div>
                 <span className="num">{stats?.companies || 30}</span>
-                <span className="lbl">Компании</span>
+                <span className="lbl">{t("companies")}</span>
               </div>
               <div>
                 <span className="num">{stats?.showrooms || products.length}</span>
-                <span className="lbl">Шоурумы</span>
+                <span className="lbl">{t("showrooms")}</span>
               </div>
               <div>
                 <span className="num">{stats?.aiRequests || 4820}</span>
-                <span className="lbl">AI запросы</span>
+                <span className="lbl">{t("aiRequests")}</span>
               </div>
             </div>
           </div>
         </section>
 
         <section className="section container" id="about">
-          <span className="eyebrow">О нас</span>
-          <h2>Konglomerat концепция</h2>
-          <p className="section-sub">Платформа объединяет компании, операционные процессы и бизнес-коммуникации в единую систему.</p>
+          <span className="eyebrow">{t("about")}</span>
+          <h2>{t("conceptTitle")}</h2>
+          <p className="section-sub">{t("conceptLead")}</p>
           <div className="grid cols-3 mt-3">
-            <InfoCard icon={<Building2 />} title="Единое управление" text="Контроль компаний и процессов из одного кабинета." />
-            <InfoCard icon={<Bot />} title="AI ядро" text="Бизнес-помощник для анализа и коммуникации." />
-            <InfoCard icon={<Check />} title="Масштаб" text="Шоурумы, экспорт, R&D и обращения в одной платформе." />
+            <InfoCard icon={<Building2 />} title={t("unifiedManagement")} text={t("unifiedManagementText")} />
+            <InfoCard icon={<Bot />} title={t("aiCore")} text={t("aiCoreText")} />
+            <InfoCard icon={<Check />} title={t("scale")} text={t("scaleText")} />
           </div>
         </section>
 
         <section className="section container" id="showrooms">
-          <span className="eyebrow">Шоурумы</span>
-          <h2>Каталог товаров</h2>
-          <p className="section-sub">Интерактивный каталог продукции компаний Konglomerat.</p>
+          <span className="eyebrow">{t("showrooms")}</span>
+          <h2>{t("productCatalog")}</h2>
+          <p className="section-sub">{t("productCatalogLead")}</p>
           <div className="grid cols-4 market-grid mt-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -81,8 +83,8 @@ export function HomePage() {
         </section>
 
         <section className="section container" id="news">
-          <span className="eyebrow">Новости</span>
-          <h2>Лента компаний</h2>
+          <span className="eyebrow">{t("news")}</span>
+          <h2>{t("companyFeed")}</h2>
           <div className="grid cols-2 mt-3">
             {news.slice(0, 4).map((article) => (
               <NewsCard key={article.id} article={article} />
@@ -91,12 +93,12 @@ export function HomePage() {
         </section>
 
         <section className="section container" id="contact">
-          <span className="eyebrow">Контакты</span>
-          <h2>Единый call-центр</h2>
+          <span className="eyebrow">{t("contacts")}</span>
+          <h2>{t("callCenter")}</h2>
           <div className="contact-grid mt-3">
-            <InfoCard icon={<Phone />} title="Телефон" text="+998 71 000 00 00" />
+            <InfoCard icon={<Phone />} title={t("phone")} text="+998 71 000 00 00" />
             <InfoCard icon={<Mail />} title="Email" text="info@konglomerat.uz" />
-            <InfoCard icon={<ShoppingBag />} title="Офис" text="Ташкент, Furqat ko'chasi, 1A" />
+            <InfoCard icon={<ShoppingBag />} title={t("office")} text={t("officeAddress")} />
           </div>
         </section>
       </main>

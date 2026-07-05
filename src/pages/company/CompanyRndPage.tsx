@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { PageTitle } from "../../components/ui/PageTitle";
@@ -8,9 +9,11 @@ import { createRndSubmission, listRndSubmissions } from "../../services/innovati
 import { localize } from "../../lib/format";
 
 export function CompanyRndPage() {
+  const { i18n } = useTranslation();
   const qc = useQueryClient();
   const { data: rnd = [] } = useQuery({ queryKey: ["rnd"], queryFn: listRndSubmissions });
   const create = useMutation({ mutationFn: createRndSubmission, onSuccess: () => qc.invalidateQueries({ queryKey: ["rnd"] }) });
+  const activeLang = i18n.resolvedLanguage || i18n.language;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,7 +33,7 @@ export function CompanyRndPage() {
         <button className="btn btn-primary">Отправить</button>
       </form>
       <Panel title="Очередь рассмотрения" count={rnd.length}>
-        {rnd.map((item) => <div className="list-row" key={item.id}><div className="grow"><b>{localize(item.name)}</b><small>{item.cat} · {item.status}</small></div></div>)}
+        {rnd.map((item) => <div className="list-row" key={item.id}><div className="grow"><b>{localize(item.name, activeLang)}</b><small>{item.cat} · {item.status}</small></div></div>)}
       </Panel>
     </WorkspaceLayout>
   );

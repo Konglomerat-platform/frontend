@@ -1084,8 +1084,8 @@ select.form-control { cursor: pointer; }
   .tg { grid-template-columns: 260px 1fr; }
 }
 
-/* tablet portrait / large phone: collapse nav + sidebar */
-@media (max-width: 900px) {
+/* tablet / phone: collapse nav + sidebar */
+@media (max-width: 1024px) {
   .menu-toggle { display: inline-grid; }
 
   /* header nav → dropdown under the header */
