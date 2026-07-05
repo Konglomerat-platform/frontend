@@ -316,11 +316,22 @@ button {
   text-align: left;
 }
 
-.product-thumb svg,
+.product-thumb > svg,
 .news-ico svg {
   width: 46px;
   height: 46px;
   color: var(--navy);
+}
+
+.fav-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.footer-contact-ico svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
 .prod-img,
@@ -402,5 +413,20 @@ button {
 
   .asst-page .asst-shell {
     min-height: calc(100vh - 180px);
+  }
+
+  .site-footer {
+    padding: 34px 0;
+  }
+
+  .site-footer .footer-top,
+  .site-footer .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-contact {
+    flex-direction: column;
+    gap: 16px;
   }
 }

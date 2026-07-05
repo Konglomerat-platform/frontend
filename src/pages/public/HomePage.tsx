@@ -1,4 +1,4 @@
-import { Bot, Building2, Check, ChevronRight, Mail, Newspaper, Phone, ShoppingBag } from "lucide-react";
+import { Bot, Building2, Check, ChevronRight, Newspaper } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../auth/AuthContext";
 import { ProductCard } from "../../components/cards/ProductCard";
 import { NewsCard } from "../../components/cards/NewsCard";
+import { SiteFooter } from "../../components/layout/SiteFooter";
 import { SiteHeader } from "../../components/layout/SiteHeader";
 import { listProducts } from "../../services/catalogService";
 import { listNews } from "../../services/contentService";
@@ -92,16 +93,8 @@ export function HomePage() {
           </div>
         </section>
 
-        <section className="section container" id="contact">
-          <span className="eyebrow">{t("contacts")}</span>
-          <h2>{t("callCenter")}</h2>
-          <div className="contact-grid mt-3">
-            <InfoCard icon={<Phone />} title={t("phone")} text="+998 71 000 00 00" />
-            <InfoCard icon={<Mail />} title="Email" text="info@konglomerat.uz" />
-            <InfoCard icon={<ShoppingBag />} title={t("office")} text={t("officeAddress")} />
-          </div>
-        </section>
       </main>
+      <SiteFooter />
     </>
   );
 }

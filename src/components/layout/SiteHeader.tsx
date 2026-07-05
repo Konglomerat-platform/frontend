@@ -1,7 +1,7 @@
 import { Layers, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, NavLink } from "react-router";
+import { Link, useLocation } from "react-router";
 
 import { useAuth } from "../../auth/AuthContext";
 import { LanguageSwitch } from "../ui/LanguageSwitch";
@@ -21,6 +21,7 @@ type SiteHeaderProps = {
 export function SiteHeader({ nav = publicNav, navOpen = false, onMenuClick, onNavClose, showNotifications = true }: SiteHeaderProps) {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
   const [localNavOpen, setLocalNavOpen] = useState(false);
   const hasHeaderNav = nav.length > 0;
   const menuOpen = onMenuClick ? navOpen : localNavOpen;
@@ -37,6 +38,13 @@ export function SiteHeader({ nav = publicNav, navOpen = false, onMenuClick, onNa
   function handleNavClose() {
     setLocalNavOpen(false);
     onNavClose?.();
+  }
+
+  function isNavActive(href: string) {
+    const [pathname, hash = ""] = href.split("#");
+    const targetPath = pathname || "/";
+    if (location.pathname !== targetPath) return false;
+    return hash ? location.hash === `#${hash}` : location.hash === "";
   }
 
   return (
@@ -59,9 +67,9 @@ export function SiteHeader({ nav = publicNav, navOpen = false, onMenuClick, onNa
           </Link>
           <nav className={`header-nav ${hasHeaderNav && menuOpen ? "open" : ""}`}>
             {nav.map((item) => (
-              <NavLink key={item.href} to={item.href} onClick={handleNavClose}>
+              <Link key={item.href} to={item.href} className={isNavActive(item.href) ? "active" : ""} onClick={handleNavClose}>
                 {t(item.labelKey)}
-              </NavLink>
+              </Link>
             ))}
           </nav>
           <div className="header-tools">

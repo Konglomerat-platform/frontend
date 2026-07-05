@@ -359,12 +359,12 @@ h1, h2, h3 { line-height: 1.18; }
 .prod-img { width: 100%; height: auto; display: block; }
 /* favorite heart floating on the image (marketplace style) */
 .fav-btn {
-  position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%;
+  position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%;
   display: grid; place-items: center; background: var(--surface-solid, #fff); color: var(--text-dim);
   border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,.12);
   cursor: pointer; padding: 0; transition: color .18s, background .18s, transform .12s; z-index: 2;
 }
-.fav-btn svg { transition: fill .18s; }
+.fav-btn svg { width: 18px; height: 18px; transition: fill .18s; }
 .fav-btn:hover { color: #e0396b; }
 .fav-btn.on { color: #e0396b; border-color: #e0396b; }
 .fav-btn.on svg { fill: #e0396b; }
@@ -1138,7 +1138,7 @@ select.form-control { cursor: pointer; }
   }
   .market-grid .prod-img { width: 100%; height: 100%; object-fit: cover; }
   .market-grid .prod-emoji { font-size: 2.6rem; }
-  .market-grid .fav-btn { width: 30px; height: 30px; top: 7px; right: 7px; }
+  .market-grid .fav-btn { width: 30px; height: 30px; top: 10px; right: 10px; }
   .market-grid .product-body { padding: 10px 11px 12px; }
   .market-grid .price { font-size: 1.15rem; }
   .market-grid .product-name { font-size: .9rem; }
