@@ -1,10 +1,11 @@
 import { ChevronLeft, Search, Sparkles, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { initials } from "../../lib/format";
 import { listCompanies } from "../../services/companyService";
+import type { ChatMessage } from "../../types";
 import { BizAiPanel } from "./BizAiPanel";
 import { ChatStream } from "./ChatStream";
 import { MessageComposer } from "./MessageComposer";
@@ -16,6 +17,7 @@ export function AdminTelegramChat() {
   const [current, setCurrent] = useState("group");
   const [search, setSearch] = useState("");
   const [showThread, setShowThread] = useState(false);
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const qc = useQueryClient();
   const { data: companies = [] } = useQuery({ queryKey: ["companies"], queryFn: listCompanies });
 
@@ -30,6 +32,10 @@ export function AdminTelegramChat() {
   }, [companies, search, t]);
 
   const active = entries.find((item) => item.id === current) || entries[1] || entries[0];
+
+  useEffect(() => {
+    setReplyTo(null);
+  }, [current]);
 
   return (
     <div className={`panel tg ${showThread ? "show-thread" : ""}`}>
@@ -50,7 +56,19 @@ export function AdminTelegramChat() {
           <div className="avatar">{active?.ai ? <Sparkles /> : active?.group ? <Users /> : initials(active?.name)}</div>
           <div><b>{active?.name}</b><small>{active?.sub}</small></div>
         </div>
-        {current === "ai" ? <div className="ai-wrap"><BizAiPanel /></div> : <><ChatStream chat={current} isGroup={current === "group"} /><MessageComposer chat={current} onSent={() => qc.invalidateQueries({ queryKey: ["messages", current] })} /></>}
+        {current === "ai" ? (
+          <div className="ai-wrap"><BizAiPanel /></div>
+        ) : (
+          <>
+            <ChatStream chat={current} isGroup={current === "group"} onReply={setReplyTo} />
+            <MessageComposer
+              chat={current}
+              replyTo={replyTo}
+              onCancelReply={() => setReplyTo(null)}
+              onSent={() => qc.invalidateQueries({ queryKey: ["messages", current] })}
+            />
+          </>
+        )}
       </div>
     </div>
   );

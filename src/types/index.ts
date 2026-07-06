@@ -90,10 +90,20 @@ export type ChatMessage = {
   chat: string;
   sender: string;
   role?: string;
-  kind: "text" | "image" | "file" | "voice";
+  kind: "text" | "image" | "file" | "video" | "voice";
   text: string;
   data?: string | null;
+  downloadUrl?: string | null;
   name?: string | null;
+  contentType?: string | null;
+  size?: number | null;
+  parent?: {
+    id: string;
+    sender: string;
+    kind: ChatMessage["kind"];
+    text: string;
+    name?: string | null;
+  } | null;
   seenBy?: Array<{ name: string; at: string }>;
   edited?: boolean;
   ts: number;

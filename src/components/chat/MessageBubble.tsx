@@ -1,9 +1,9 @@
-import { File, Pencil, Trash2 } from "lucide-react";
+import { Check, CheckCheck, Download, File, Pencil, Reply, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUi } from "../../context/UiContext";
-import { formatSeen, initials } from "../../lib/format";
+import { formatFileSize, formatSeen, initials } from "../../lib/format";
 import { deleteMessage, editMessage } from "../../services/chatService";
 import type { ChatMessage } from "../../types";
 
@@ -12,10 +12,18 @@ type MessageBubbleProps = {
   meName?: string;
   isGroup?: boolean;
   isAdmin?: boolean;
+  onReply: (message: ChatMessage) => void;
   onChanged: () => void;
 };
 
-export function MessageBubble({ message, meName, isGroup = false, isAdmin = false, onChanged }: MessageBubbleProps) {
+export function MessageBubble({
+  message,
+  meName,
+  isGroup = false,
+  isAdmin = false,
+  onReply,
+  onChanged,
+}: MessageBubbleProps) {
   const { t } = useTranslation();
   const [seenOpen, setSeenOpen] = useState(false);
   const { confirm, prompt, toast } = useUi();
@@ -47,69 +55,133 @@ export function MessageBubble({ message, meName, isGroup = false, isAdmin = fals
   return (
     <div className={`bubble ${me ? "me" : "them"}`} data-id={message.id}>
       <div className="b-from">{message.sender}</div>
+      {message.parent ? <ReplyPreview parent={message.parent} /> : null}
       <MessageContent message={message} />
       {message.edited ? <span className="b-edited">({t("edited")})</span> : null}
       <div className={`b-receipt ${message.seenBy?.length ? "seen" : ""}`}>
-        <span className="b-time">{formatSeen(message.ts)}</span>
+        <time className="b-time">{formatSeen(message.ts)}</time>
         {me ? (
-          isGroup && message.seenBy?.length ? (
-            <>
-              <button className="seen-toggle" type="button" onClick={() => setSeenOpen((value) => !value)}>
-                ✓✓ {message.seenBy.length}
-              </button>
-              <div className="seen-pop" hidden={!seenOpen}>
-                <div className="seen-head">{t("whoSeen")}</div>
-                {message.seenBy.map((item) => (
-                  <div className="seen-row" key={`${item.name}-${item.at}`}>
-                    <span className="seen-ava">{initials(item.name)}</span>
-                    <span className="seen-name">{item.name}</span>
-                    <time>{formatSeen(item.at)}</time>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <span className={message.seenBy?.length ? "rc-seen" : "rc-sent"}>
-              {message.seenBy?.length ? `✓✓ ${t("seen")}` : `✓ ${t("sent")}`}
-            </span>
-          )
+          <ReceiptStatus
+            message={message}
+            isGroup={isGroup}
+            seenOpen={seenOpen}
+            setSeenOpen={setSeenOpen}
+          />
         ) : null}
       </div>
-      {canEdit || canDelete ? (
-        <div className="bubble-actions">
-          {canEdit ? (
-            <button type="button" onClick={onEdit} title={t("edit")}>
-              <Pencil />
-            </button>
-          ) : null}
-          {canDelete ? (
-            <button type="button" onClick={onDelete} title={t("delete")} data-msg-act="del">
-              <Trash2 />
-            </button>
-          ) : null}
+      <div className="bubble-actions">
+        <button type="button" onClick={() => onReply(message)} title={t("replyAction")}>
+          <Reply />
+        </button>
+        {canEdit ? (
+          <button type="button" onClick={onEdit} title={t("edit")}>
+            <Pencil />
+          </button>
+        ) : null}
+        {canDelete ? (
+          <button type="button" onClick={onDelete} title={t("delete")} data-msg-act="del">
+            <Trash2 />
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function ReceiptStatus({
+  message,
+  isGroup,
+  seenOpen,
+  setSeenOpen,
+}: {
+  message: ChatMessage;
+  isGroup: boolean;
+  seenOpen: boolean;
+  setSeenOpen: (value: boolean | ((value: boolean) => boolean)) => void;
+}) {
+  const { t } = useTranslation();
+  const seenCount = message.seenBy?.length || 0;
+  if (isGroup && seenCount) {
+    return (
+      <span className="receipt-wrap">
+        <button className="seen-toggle" type="button" onClick={() => setSeenOpen((value) => !value)}>
+          <CheckCheck />
+          <span>{seenCount}</span>
+        </button>
+        <div className="seen-pop" hidden={!seenOpen}>
+          <div className="seen-head">{t("whoSeen")}</div>
+          {message.seenBy?.map((item) => (
+            <div className="seen-row" key={`${item.name}-${item.at}`}>
+              <span className="seen-ava">{initials(item.name)}</span>
+              <span className="seen-name">{item.name}</span>
+              <time>{formatSeen(item.at)}</time>
+            </div>
+          ))}
         </div>
-      ) : null}
+      </span>
+    );
+  }
+  return (
+    <span className={`receipt-status ${seenCount ? "rc-seen" : "rc-sent"}`}>
+      {seenCount ? <CheckCheck /> : <Check />}
+      <span>{seenCount ? t("seen") : t("sent")}</span>
+    </span>
+  );
+}
+
+function ReplyPreview({ parent }: { parent: NonNullable<ChatMessage["parent"]> }) {
+  return (
+    <div className="b-reply-preview">
+      <b>{parent.sender}</b>
+      <span>{parent.name || parent.text || parent.kind}</span>
     </div>
   );
 }
 
 function MessageContent({ message }: { message: ChatMessage }) {
-  if (message.kind === "image" && message.data) return <img className="b-img" src={message.data} alt="" />;
-  if (message.kind === "voice" && message.data) {
+  const mediaUrl = message.data || message.downloadUrl || "";
+  if (message.kind === "image" && mediaUrl) {
     return (
-      <span className="b-voice">
-        <audio className="b-audio" controls src={message.data} />
-        {message.dur ? <span className="b-dur">{Math.round(message.dur)}s</span> : null}
-      </span>
+      <>
+        <img className="b-img" src={mediaUrl} alt="" />
+        <Caption text={message.text} />
+      </>
     );
   }
-  if (message.kind === "file" && message.data) {
+  if (message.kind === "video" && mediaUrl) {
     return (
-      <a className="b-file" href={message.data} download={message.name || "file"}>
-        <File />
-        <span>{message.name || "file"}</span>
-      </a>
+      <>
+        <video className="b-video" controls src={mediaUrl} />
+        <Caption text={message.text} />
+      </>
+    );
+  }
+  if (message.kind === "voice" && mediaUrl) {
+    return (
+      <div className="b-voice">
+        <audio className="b-audio" controls src={mediaUrl} />
+        {message.dur ? <span className="b-dur">{Math.round(message.dur)}s</span> : null}
+      </div>
+    );
+  }
+  if (message.kind === "file" && mediaUrl) {
+    return (
+      <>
+        <a className="b-file" href={message.downloadUrl || mediaUrl} download={message.name || "file"}>
+          <File />
+          <span className="b-file-info">
+            <b>{message.name || "file"}</b>
+            <small>{[formatFileSize(message.size), message.contentType].filter(Boolean).join(" | ")}</small>
+          </span>
+          <Download className="b-download" />
+        </a>
+        <Caption text={message.text} />
+      </>
     );
   }
   return <span className="b-text">{message.text}</span>;
+}
+
+function Caption({ text }: { text?: string | null }) {
+  return text ? <span className="b-caption">{text}</span> : null;
 }

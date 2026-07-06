@@ -7,6 +7,10 @@ export function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
+export function getAccessToken() {
+  return accessToken;
+}
+
 type ApiInit = Omit<RequestInit, "body"> & { body?: unknown };
 
 export async function api<T>(path: string, init: ApiInit = {}): Promise<T> {

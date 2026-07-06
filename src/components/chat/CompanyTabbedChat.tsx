@@ -1,9 +1,10 @@
 import { MessageCircle, Sparkles, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "../../auth/AuthContext";
+import type { ChatMessage } from "../../types";
 import { BizAiPanel } from "./BizAiPanel";
 import { ChatStream } from "./ChatStream";
 import { MessageComposer } from "./MessageComposer";
@@ -12,8 +13,13 @@ export function CompanyTabbedChat() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [tab, setTab] = useState<"group" | "me" | "ai">("group");
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const qc = useQueryClient();
   const chat = tab === "group" ? "group" : user?.company?.name || user?.name || "";
+
+  useEffect(() => {
+    setReplyTo(null);
+  }, [chat, tab]);
 
   return (
     <>
@@ -33,8 +39,13 @@ export function CompanyTabbedChat() {
             </div>
             {tab === "group" ? <span className="tag">31</span> : null}
           </div>
-          <ChatStream chat={chat} isGroup={tab === "group"} />
-          <MessageComposer chat={chat} onSent={() => qc.invalidateQueries({ queryKey: ["messages", chat] })} />
+          <ChatStream chat={chat} isGroup={tab === "group"} onReply={setReplyTo} />
+          <MessageComposer
+            chat={chat}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyTo(null)}
+            onSent={() => qc.invalidateQueries({ queryKey: ["messages", chat] })}
+          />
         </div>
       )}
     </>

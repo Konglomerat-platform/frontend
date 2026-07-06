@@ -3,11 +3,13 @@ import type { ChatMessage } from "../types";
 
 export type SendMessagePayload = {
   chat: string;
-  kind?: "text" | "image" | "file" | "voice";
+  kind?: ChatMessage["kind"];
   text?: string;
   data?: string;
   name?: string;
   dur?: number;
+  parent?: string;
+  file?: File | Blob;
 };
 
 export function listMessages(chat: string) {
@@ -15,6 +17,17 @@ export function listMessages(chat: string) {
 }
 
 export function sendMessage(payload: SendMessagePayload) {
+  if (payload.file) {
+    const body = new FormData();
+    body.set("chat", payload.chat);
+    if (payload.kind) body.set("kind", payload.kind);
+    if (payload.text) body.set("text", payload.text);
+    if (payload.name) body.set("name", payload.name);
+    if (payload.dur != null) body.set("dur", String(payload.dur));
+    if (payload.parent) body.set("parent", payload.parent);
+    body.set("file", payload.file, payload.name || "attachment");
+    return api<ChatMessage>("/api/chat/messages/", { method: "POST", body });
+  }
   return api<ChatMessage>("/api/chat/messages/", { method: "POST", body: payload });
 }
 
