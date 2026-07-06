@@ -41,7 +41,9 @@ export function NotificationsBell() {
                   {item.link ? <span className="ni-go"><ChevronLeft /></span> : null}
                 </>
               );
-              return item.link ? (
+              return item.link && isExternalLink(item.link) ? (
+                <a key={item.id} className={`notif-item ${item.read ? "" : "unread"} clickable`} href={item.link} target="_blank" rel="noreferrer">{content}</a>
+              ) : item.link ? (
                 <Link key={item.id} className={`notif-item ${item.read ? "" : "unread"} clickable`} to={item.link}>{content}</Link>
               ) : (
                 <div key={item.id} className={`notif-item ${item.read ? "" : "unread"}`}>{content}</div>
@@ -51,8 +53,15 @@ export function NotificationsBell() {
             <div className="notif-empty">{t("noNotifications")}</div>
           )}
         </div>
-        <button className="btn btn-soft btn-block" type="button" onClick={markRead}>{t("markRead")}</button>
+        <div className="notif-actions">
+          <Link className="btn btn-primary btn-sm" to="/notifications" onClick={() => setOpen(false)}>{t("allNotifications")}</Link>
+          <button className="btn btn-soft btn-sm" type="button" onClick={markRead}>{t("markRead")}</button>
+        </div>
       </div>
     </div>
   );
+}
+
+function isExternalLink(value: string) {
+  return /^https?:\/\//i.test(value);
 }

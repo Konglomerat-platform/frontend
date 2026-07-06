@@ -5,7 +5,6 @@ import { AdminComplaintDetailPage } from "./pages/admin/AdminComplaintDetailPage
 import { AdminComplaintsPage } from "./pages/admin/AdminComplaintsPage";
 import { AdminConferencesPage } from "./pages/admin/AdminConferencesPage";
 import { AdminControlPage } from "./pages/admin/AdminControlPage";
-import { AdminModulesPage } from "./pages/admin/AdminModulesPage";
 import { AdminOverviewPage } from "./pages/admin/AdminOverviewPage";
 import { AdminRndPage } from "./pages/admin/AdminRndPage";
 import { CompanyChatsPage } from "./pages/company/CompanyChatsPage";
@@ -19,6 +18,7 @@ import { FavoritesPage } from "./pages/public/FavoritesPage";
 import { HomePage } from "./pages/public/HomePage";
 import { LoginPage } from "./pages/public/LoginPage";
 import { NewsDetailPage } from "./pages/public/NewsDetailPage";
+import { NotificationsPage } from "./pages/public/NotificationsPage";
 import { ProductDetailPage } from "./pages/public/ProductDetailPage";
 
 export function App() {
@@ -32,6 +32,10 @@ export function App() {
       <Route path="/complaint" element={<ComplaintPage />} />
       <Route path="/assistant" element={<AssistantPage />} />
 
+      <Route element={<ProtectedRoute />}>
+        <Route path="/notifications" element={<NotificationsPage />} />
+      </Route>
+
       <Route element={<ProtectedRoute role="company" />}>
         <Route path="/company" element={<CompanyDashboardPage />} />
         <Route path="/company/content" element={<CompanyContentPage />} />
@@ -43,7 +47,6 @@ export function App() {
       <Route element={<ProtectedRoute role="admin" />}>
         <Route path="/admin" element={<AdminOverviewPage />} />
         <Route path="/admin/control" element={<AdminControlPage />} />
-        <Route path="/admin/modules" element={<AdminModulesPage />} />
         <Route path="/admin/conferences" element={<AdminConferencesPage />} />
         <Route path="/admin/complaints" element={<AdminComplaintsPage />} />
         <Route path="/admin/complaints/:id" element={<AdminComplaintDetailPage />} />

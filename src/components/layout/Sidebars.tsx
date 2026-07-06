@@ -1,4 +1,4 @@
-import { BarChart3, FileText, FlaskConical, Grid3X3, Home, MessageCircle, Newspaper, Package, SlidersHorizontal, Video } from "lucide-react";
+import { BarChart3, FileText, FlaskConical, Home, MessageCircle, Newspaper, Package, SlidersHorizontal, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
@@ -53,7 +53,6 @@ export function CompanySidebar({ active, onNavigate }: SidebarProps) {
 const adminLinks: SidebarLink[] = [
   { key: "overview", href: "/admin", labelKey: "overview", Icon: BarChart3 },
   { key: "control", href: "/admin/control", labelKey: "control", Icon: SlidersHorizontal },
-  { key: "modules", href: "/admin/modules", labelKey: "modules", Icon: Grid3X3 },
   { key: "conferences", href: "/admin/conferences", labelKey: "conferences", Icon: Video },
   { key: "chats", href: "/admin/chats", labelKey: "chats", Icon: MessageCircle },
   { key: "rnd", href: "/admin/rnd", labelKey: "rndCenter", Icon: FlaskConical },

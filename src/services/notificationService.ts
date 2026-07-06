@@ -8,3 +8,7 @@ export function listNotifications() {
 export function markNotificationsRead() {
   return api<{ ok: boolean }>("/api/notifications/read/", { method: "POST" });
 }
+
+export function markNotificationRead(id: number) {
+  return api<{ ok: boolean }>(`/api/notifications/${encodeURIComponent(id)}/read/`, { method: "POST" });
+}

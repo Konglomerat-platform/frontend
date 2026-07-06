@@ -47,6 +47,24 @@ export function ChatStream({
     scrollChatToEnd(streamRef.current);
   }, [messages.length, chat]);
 
+  const jumpToMessage = useCallback(
+    (id: string) => {
+      const container = streamRef.current;
+      if (!container) return;
+      const selector = `[data-id="${escapeCss(id)}"]`;
+      const target = container.querySelector<HTMLElement>(selector);
+      if (!target) {
+        query.refetch().then(() => {
+          const refreshed = container.querySelector<HTMLElement>(selector);
+          if (refreshed) highlightMessage(refreshed);
+        });
+        return;
+      }
+      highlightMessage(target);
+    },
+    [query],
+  );
+
   return (
     <div className={`chat-stream ${className}`} ref={streamRef}>
       {messages.map((message) => (
@@ -57,9 +75,21 @@ export function ChatStream({
           isGroup={isGroup}
           isAdmin={user?.role === "admin"}
           onReply={onReply}
+          onJumpToMessage={jumpToMessage}
           onChanged={() => query.refetch()}
         />
       ))}
     </div>
   );
+}
+
+function highlightMessage(target: HTMLElement) {
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  target.classList.add("b-highlight");
+  window.setTimeout(() => target.classList.remove("b-highlight"), 1500);
+}
+
+function escapeCss(value: string) {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") return CSS.escape(value);
+  return value.replace(/["\\]/g, "\\$&");
 }

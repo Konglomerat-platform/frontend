@@ -24,7 +24,14 @@ export function CompanyDashboardPage() {
         <div className="notify-banner">
           <Video />
           <div className="grow"><b>{t("directorCreatedConference")}</b><span>{conferences[0].name} · {conferences[0].date} {conferences[0].time}</span></div>
-          <a className="btn btn-primary btn-sm" href={conferences[0].link || "#"}>{t("joinConference")}</a>
+          <a
+            className="btn btn-primary btn-sm"
+            href={conferences[0].link || "#"}
+            target={conferences[0].link ? "_blank" : undefined}
+            rel={conferences[0].link ? "noreferrer" : undefined}
+          >
+            {t("joinConference")}
+          </a>
         </div>
       ) : null}
       <div className="grid cols-4 mt-3">

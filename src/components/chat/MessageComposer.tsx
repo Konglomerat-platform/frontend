@@ -1,5 +1,5 @@
 import { File as FileIcon, Image, Mic, Paperclip, Send, Square, Video, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUi } from "../../context/UiContext";
@@ -13,6 +13,9 @@ type PendingAttachment = {
   previewUrl?: string;
 };
 
+const MAX_ATTACHMENTS = 10;
+const MAX_FILE_SIZE = 8 * 1024 * 1024;
+
 type MessageComposerProps = {
   chat: string;
   replyTo?: ChatMessage | null;
@@ -24,26 +27,26 @@ export function MessageComposer({ chat, replyTo, onCancelReply, onSent }: Messag
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
-  const [pending, setPending] = useState<PendingAttachment | null>(null);
+  const [pending, setPending] = useState<PendingAttachment[]>([]);
+  const [sending, setSending] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const pendingRef = useRef<PendingAttachment[]>([]);
   const chunksRef = useRef<Blob[]>([]);
   const startedRef = useRef(0);
   const { toast } = useUi();
 
-  const canSend = !!text.trim() || !!pending;
-  const pendingIcon = useMemo(() => {
-    if (!pending) return null;
-    if (pending.kind === "image") return <Image />;
-    if (pending.kind === "video") return <Video />;
-    return <FileIcon />;
+  const canSend = !sending && (!!text.trim() || pending.length > 0);
+
+  useEffect(() => {
+    pendingRef.current = pending;
   }, [pending]);
 
   useEffect(() => {
     return () => {
-      if (pending?.previewUrl) URL.revokeObjectURL(pending.previewUrl);
+      pendingRef.current.forEach(revokeAttachment);
     };
-  }, [pending]);
+  }, []);
 
   async function post(payload: Omit<SendMessagePayload, "chat">) {
     await sendMessage({ chat, parent: replyTo?.id, ...payload });
@@ -53,10 +56,18 @@ export function MessageComposer({ chat, replyTo, onCancelReply, onSent }: Messag
 
   async function sendCurrent() {
     const value = text.trim();
-    if (!value && !pending) return;
-    const attachment = pending;
+    if (!value && !pending.length) return;
+    const attachments = pending;
+    setSending(true);
     try {
-      if (attachment) {
+      if (attachments.length > 1) {
+        await post({
+          kind: "album",
+          text: value,
+          files: attachments.map((item) => item.file),
+        });
+      } else if (attachments[0]) {
+        const attachment = attachments[0];
         await post({
           kind: attachment.kind,
           text: value,
@@ -67,29 +78,66 @@ export function MessageComposer({ chat, replyTo, onCancelReply, onSent }: Messag
         await post({ kind: "text", text: value });
       }
       setText("");
-      setPending(null);
+      clearPending();
     } catch {
-      toast(t("error"), t(attachment ? "fileSendFailed" : "sendFailed"), "error");
+      toast(t("error"), t(attachments.length ? "fileSendFailed" : "sendFailed"), "error");
+    } finally {
+      setSending(false);
     }
   }
 
-  function stageFile(file: File) {
-    if (file.size > 8 * 1024 * 1024) {
-      toast(t("fileTooLarge"), t("max8Mb"), "error");
-      return;
-    }
+  function attachmentIcon(kind: ChatMessage["kind"]) {
+    if (kind === "image") return <Image />;
+    if (kind === "video") return <Video />;
+    return <FileIcon />;
+  }
+
+  function revokeAttachment(attachment: PendingAttachment) {
+    if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
+  }
+
+  function clearPending() {
+    pendingRef.current.forEach(revokeAttachment);
+    setPending([]);
+  }
+
+  function removeAttachment(index: number) {
+    setPending((current) => {
+      const next = [...current];
+      const [removed] = next.splice(index, 1);
+      if (removed) revokeAttachment(removed);
+      return next;
+    });
+  }
+
+  function createAttachment(file: File): PendingAttachment {
     const kind: ChatMessage["kind"] = file.type.startsWith("image/")
       ? "image"
       : file.type.startsWith("video/")
         ? "video"
         : "file";
+    return {
+      file,
+      kind,
+      previewUrl: kind === "image" || kind === "video" ? URL.createObjectURL(file) : undefined,
+    };
+  }
+
+  function stageFiles(files: File[]) {
+    const valid = files.filter((file) => {
+      if (file.size <= MAX_FILE_SIZE) return true;
+      toast(t("fileTooLarge"), `${file.name} · ${t("max8Mb")}`, "error");
+      return false;
+    });
+    if (!valid.length) return;
     setPending((current) => {
-      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
-      return {
-        file,
-        kind,
-        previewUrl: kind === "image" || kind === "video" ? URL.createObjectURL(file) : undefined,
-      };
+      const slots = MAX_ATTACHMENTS - current.length;
+      if (slots <= 0) {
+        toast(t("fileTooLarge"), t("max10Files"), "error");
+        return current;
+      }
+      if (valid.length > slots) toast(t("fileTooLarge"), t("max10Files"), "error");
+      return [...current, ...valid.slice(0, slots).map(createAttachment)];
     });
   }
 
@@ -140,29 +188,34 @@ export function MessageComposer({ chat, replyTo, onCancelReply, onSent }: Messag
           </button>
         </div>
       ) : null}
-      {pending ? (
-        <div className="composer-attachment">
-          {pending.previewUrl && pending.kind === "image" ? <img src={pending.previewUrl} alt="" /> : null}
-          {pending.previewUrl && pending.kind === "video" ? <video src={pending.previewUrl} muted /> : null}
-          {!pending.previewUrl ? <span className="draft-ico">{pendingIcon}</span> : null}
-          <span className="draft-meta">
-            <b>{pending.file.name}</b>
-            <small>{[formatFileSize(pending.file.size), pending.file.type].filter(Boolean).join(" | ")}</small>
-          </span>
-          <button className="draft-x" type="button" onClick={() => setPending(null)} title={t("cancel")}>
-            <X />
-          </button>
+      {pending.length ? (
+        <div className="composer-attachments">
+          {pending.map((attachment, index) => (
+            <div className="composer-attachment" key={`${attachment.file.name}-${attachment.file.size}-${index}`}>
+              {attachment.previewUrl && attachment.kind === "image" ? <img src={attachment.previewUrl} alt="" /> : null}
+              {attachment.previewUrl && attachment.kind === "video" ? <video src={attachment.previewUrl} muted /> : null}
+              {!attachment.previewUrl ? <span className="draft-ico">{attachmentIcon(attachment.kind)}</span> : null}
+              <span className="draft-meta">
+                <b>{attachment.file.name}</b>
+                <small>{[formatFileSize(attachment.file.size), attachment.file.type].filter(Boolean).join(" | ")}</small>
+              </span>
+              <button className="draft-x" type="button" onClick={() => removeAttachment(index)} title={t("cancel")}>
+                <X />
+              </button>
+            </div>
+          ))}
         </div>
       ) : null}
       <div className="chat-input">
         <input
           ref={fileRef}
           type="file"
+          multiple
           hidden
           accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.zip"
           onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) stageFile(file);
+            const files = Array.from(event.target.files || []);
+            if (files.length) stageFiles(files);
             event.currentTarget.value = "";
           }}
         />

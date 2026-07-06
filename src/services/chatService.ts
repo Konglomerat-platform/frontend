@@ -10,6 +10,7 @@ export type SendMessagePayload = {
   dur?: number;
   parent?: string;
   file?: File | Blob;
+  files?: File[];
 };
 
 export function listMessages(chat: string) {
@@ -17,6 +18,16 @@ export function listMessages(chat: string) {
 }
 
 export function sendMessage(payload: SendMessagePayload) {
+  if (payload.files?.length) {
+    const body = new FormData();
+    body.set("chat", payload.chat);
+    body.set("kind", "album");
+    if (payload.text) body.set("text", payload.text);
+    if (payload.parent) body.set("parent", payload.parent);
+    payload.files.forEach((file) => body.append("files", file, file.name));
+    return api<ChatMessage>("/api/chat/messages/", { method: "POST", body });
+  }
+
   if (payload.file) {
     const body = new FormData();
     body.set("chat", payload.chat);

@@ -90,7 +90,7 @@ export type ChatMessage = {
   chat: string;
   sender: string;
   role?: string;
-  kind: "text" | "image" | "file" | "video" | "voice";
+  kind: "text" | "image" | "file" | "video" | "voice" | "album";
   text: string;
   data?: string | null;
   downloadUrl?: string | null;
@@ -104,10 +104,21 @@ export type ChatMessage = {
     text: string;
     name?: string | null;
   } | null;
+  attachments?: ChatAttachment[];
   seenBy?: Array<{ name: string; at: string }>;
   edited?: boolean;
   ts: number;
   dur?: number | null;
+};
+
+export type ChatAttachment = {
+  id: number;
+  kind: "image" | "file" | "video";
+  url?: string | null;
+  downloadUrl?: string | null;
+  name?: string | null;
+  contentType?: string | null;
+  size?: number | null;
 };
 
 export type NotificationResponse = {
